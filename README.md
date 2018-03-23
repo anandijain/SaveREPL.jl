@@ -1,6 +1,6 @@
 # SaveREPL
 
-A package to save commands executed in the Julia REPL as script file.
+A package to save commands executed in the Julia REPL to a script file.
 
 Ignores help and shell mode commands as well as calls to exported functions of the package itself. Based on the `.julia_history` file. 
 
@@ -56,3 +56,7 @@ s = "Hello!"
 
 There is also `printREPL(n::Int=10)` which prints the last `n` Julia commands. Note that in contrast to `saveREPL` latest commands come first.
 
+
+## Credits
+
+This package is a fork of https://github.com/sjkelly/SaveREPL.jl. However, it has been changed/rewritten significantly.
