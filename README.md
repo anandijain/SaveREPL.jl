@@ -8,7 +8,7 @@ Ignores help and shell mode commands as well as calls to exported functions of t
 
 The signature is `saveREPL(filename::String, n::Int=10)` where `n` is the number of commands to save.
 
-```
+```julia
 julia> using SaveREPL
 
 julia> a = 1
@@ -42,7 +42,7 @@ julia> saveREPL("script.jl", 5)
 
 This will produce a script "script.jl" with the following content
 
-```
+```julia
 a = 1
 b = 2
 a + b
