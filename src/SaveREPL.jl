@@ -1,10 +1,12 @@
 module SaveREPL
 
+using REPL, InteractiveUtils
+
 export saveREPL
 export printREPL
+export copyREPL
 
-
-immutable REPLEntry
+struct REPLEntry
     time::String
     mode::String
     command::String
@@ -20,11 +22,17 @@ Order: oldest command first. Ignores help and shell mode commands as well as
 """
 function saveREPL(filename::String, n::Int=10)
     open(filename, "w") do f
-        # write(f, script(julia_history, lines))
         entries = history(n+1)
         write(f, join((x->x.command).(entries[1:end-1]), "\n"))
     end
     nothing
+end
+
+function saveREPL(io, n::Int=10)
+    entries = history(n+1)
+    for e in entries[1:end-1]
+        write(io, e.command, "\n")
+    end
 end
 
 """
@@ -32,15 +40,20 @@ end
 
 Prints the `n` last executed Julia commands.
 
-Order: latest command first. Ignores help and shell mode commands as well as 
-`printREPL` and `saveREPL` calls.
+Order defaults from old to new.
 """
 function printREPL(n::Int=10)
     entries = history(n+1)
-    for e in reverse(entries[1:end-1])
+    for e in entries[1:end-1]
         println(e.command)
     end
     nothing
+end
+
+function copyREPL(n::Int=10)
+    io = IOBuffer()
+    saveREPL(io, n)
+    clipboard(String(take!(io)))
 end
 
 """
@@ -49,7 +62,7 @@ end
 Load last `n` executed Julia commands from `.julia_history` file.
 """
 function history(n::Int)
-    h = reverse(readlines(Base.REPL.find_hist_file()))
+    h = reverse(readlines(REPL.find_hist_file()))
     entries = REPLEntry[]
     i = 1
     N = length(h)
@@ -61,19 +74,19 @@ function history(n::Int)
 
         cmdlines = String[]
         while startswith(line, "\t")
-            push!(cmdlines, replace(line, "\t", "", 1))
+            push!(cmdlines, replace(line, "\t"=>""; count=1))
             i+=1
             line = h[i]
         end
         command = join(reverse(cmdlines), "\n")
 
         contains(line, "# mode:") || warn("wrong order: expected mode")
-        mode = replace(chomp(line), "# mode: ", "")
+        mode = replace(chomp(line), "# mode: "=>"")
 
         i+=1
         line = h[i]
         contains(line, "# time: ") || warn("wrong order: expected time")
-        time = replace(chomp(line), "# time: ", "")
+        time = replace(chomp(line), "# time: "=>"")
         i+=1
 
         contains(mode, "julia") || continue
